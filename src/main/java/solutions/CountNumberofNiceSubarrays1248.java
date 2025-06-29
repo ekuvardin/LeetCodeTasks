@@ -2,6 +2,12 @@ package solutions;
 
 /*
 yandex
+
+This Counter represents how many times each
+ count has been seen so far in the array,
+  which is essential for determining the number of nice subarrays.
+
+  This problem is about finding the count of all the sub-arrays that has exactly “k” number of odd elements.
  */
 public class CountNumberofNiceSubarrays1248 {
 
