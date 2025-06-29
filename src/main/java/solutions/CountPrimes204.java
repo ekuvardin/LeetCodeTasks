@@ -1,6 +1,10 @@
 package solutions;
 /*
 yandex
+Given an integer n, return the number of prime numbers
+that are strictly less than n.
+Example 1: Input: n = 10 Output: 4 Explanation: There are 4 prime numbers ...
+
  */
 public class CountPrimes204 {
     public int countPrimes(int n) {
