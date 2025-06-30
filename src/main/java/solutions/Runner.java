@@ -1,6 +1,7 @@
 package solutions;
 
 import org.json.simple.parser.ParseException;
+import rewritesolution.LongestRepeatingCharacterReplacement;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -9,8 +10,8 @@ import java.util.List;
 public class Runner {
 
     public static void main(String[] args) throws IOException, ParseException {
-        LongestRepeatingCharacterReplacement424 l = new LongestRepeatingCharacterReplacement424();
-        l.characterReplacement("AAAAAABBBB", 2);
+        SubarraySumsDivisiblebyK974 l = new SubarraySumsDivisiblebyK974();
+        l.subarraysDivByK(new int[] {4,5,0,-2,-3,1}, 5);
     }
 
 }
