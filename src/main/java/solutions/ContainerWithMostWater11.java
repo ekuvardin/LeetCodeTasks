@@ -21,6 +21,8 @@ Examples :
     Output: 25
     Explanation: 8 and 5 are 5 distance apart. So the size of the base = 5. Height of container = min(8, 5) = 5. So, total area = 5 * 5 = 25.
 
+  ContainerWithMostWater11 l = new ContainerWithMostWater11();
+        l.maxArea(new int[] {2,1,1,1,1,1,1,1,1,1,1,3,1,3,1,1,1,1,1});
  */
 public class ContainerWithMostWater11 {
     public int maxArea(int[] height) {
