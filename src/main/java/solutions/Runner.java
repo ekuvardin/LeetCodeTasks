@@ -10,8 +10,9 @@ import java.util.List;
 public class Runner {
 
     public static void main(String[] args) throws IOException, ParseException {
-        SubarraySumsDivisiblebyK974 l = new SubarraySumsDivisiblebyK974();
-        l.subarraysDivByK(new int[] {4,5,0,-2,-3,1}, 5);
+        BasicCalculator2 l = new BasicCalculator2();
+       // l.calculate(new String("1*2-3/4-26"));
+       l.calculate(new String("1*2+3*4-5*6+7*8-9*10"));
     }
 
 }

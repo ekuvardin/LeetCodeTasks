@@ -1,7 +1,9 @@
 package solutions;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 /*
 yandex
@@ -18,13 +20,13 @@ public class IsomorphicStrings205 {
         }
 
         Map<Character, Character> mappedValues = new HashMap<>(28);
-        Map<Character, Character> mappedValuesReversed = new HashMap<>(28);
+        Set<Character> valuesReversed = new HashSet<>(28);
 
         for (int i = 0; i < s.length(); i++) {
             if (mappedValues.get(s.charAt(i)) == null) {
-                if (mappedValuesReversed.get(t.charAt(i)) == null) {
+                if (!valuesReversed.contains(t.charAt(i))) {
                     mappedValues.put(s.charAt(i), t.charAt(i));
-                    mappedValuesReversed.put(t.charAt(i), s.charAt(i));
+                    valuesReversed.add(t.charAt(i));
                 } else {
                     return false;
                 }
