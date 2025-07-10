@@ -39,31 +39,21 @@ recentCounter.ping(3002);  // requests = [1, 100, 3001, 3002], range is [2,3002]
  */
 public class NumberofRecentalls933 {
 
-    class RecentCounter {
+    private static final int[] records = new int[10000]; //
+    private int start;
+    private int end;
 
-        final TreeSet<Integer> set;
-        final Integer maxVal = 3000;
+    public NumberofRecentalls933() {
+        start = 0;
+        end = 0;
+    }
 
-        public RecentCounter() {
-            set = new TreeSet<>(Comparator.reverseOrder());
+    public int ping(int t) {
+        while (start < end && (t - records[start] > 3000)) {
+            start++; // if the difference in time is greater than 3000ms,
+            // than increase the value of start unitl it's equal or less than 3000ms.
         }
-
-        public int ping(int t) {
-            Iterator<Integer> iterator = set.iterator();
-            int value = 1;
-
-            Integer comp = t - maxVal;
-            while (iterator.hasNext()) {
-                if (comp.compareTo(iterator.next()) <= 0){
-                    value++;
-                } else {
-                    break;
-                }
-            }
-
-            set.add(t);
-
-            return value;
-        }
+        records[end++] = t; // Inserting the current time at the end
+        return end - start; // Returning the answer including the element added just now.
     }
 }
