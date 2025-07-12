@@ -6,6 +6,13 @@ import java.util.List;
 import java.util.Queue;
 import java.util.Stack;
 
+/*
+yandex
+
+        BasicCalculator2 l = new BasicCalculator2();
+       // l.calculate(new String("1*2-3/4-26"));
+       l.calculate1(new String("282-1*2*13-30"));
+ */
 public class BasicCalculator2 {
 
     public int calculate1(String s) {
