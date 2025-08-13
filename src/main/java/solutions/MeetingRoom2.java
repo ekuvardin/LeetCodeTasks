@@ -9,19 +9,14 @@ import java.util.PriorityQueue;
  */
 public class MeetingRoom2 {
     public int minMeetingRooms(int[][] intervals) {
-        PriorityQueue<Integer> queue = new PriorityQueue<Integer>();
+        PriorityQueue<Integer> queue = new PriorityQueue<>();
 
-        Arrays.sort(intervals, new Comparator<int[]>() {
-            @Override
-            public int compare(int[] o1, int[] o2) {
-                return o1[0] - o2[0];
-            }
-        });
+        Arrays.sort(intervals, Comparator.comparingInt(o -> o[0]));
 
         int result = 0;
-        for(int[] interval: intervals){
+        for (int[] interval : intervals) {
             queue.add(interval[1]);
-            if(interval[0] < queue.peek()) {
+            if (interval[0] < queue.peek()) {
                 result++;
             } else {
                 queue.poll();
@@ -30,4 +25,6 @@ public class MeetingRoom2 {
 
         return result;
     }
+
+
 }

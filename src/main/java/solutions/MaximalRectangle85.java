@@ -1,5 +1,7 @@
 package solutions;
 
+import java.util.HashSet;
+import java.util.Set;
 import java.util.Stack;
 
 /*
@@ -44,18 +46,18 @@ public class MaximalRectangle85 {
         int[] heights = new int[colCount];
         int maxArea = 0;
 
-        for(int i = 0; i < rowCount; i++) {
-            for(int j=0; j< colCount; j++) {
+        for (int i = 0; i < rowCount; i++) {
+            for (int j = 0; j < colCount; j++) {
                 heights[j] = matrix[i][j] == '0' ? 0 : heights[j] + 1;
             }
 
             Stack<Integer> stack = new Stack<>();
 
-            for(int j = 0; j<colCount; j++) {
-                if(stack.isEmpty() || heights[j] > heights[stack.peek()]) {
+            for (int j = 0; j < colCount; j++) {
+                if (stack.isEmpty() || heights[j] > heights[stack.peek()]) {
                     stack.push(j);
                 } else {
-                    while(!stack.isEmpty() && heights[j] <= heights[stack.peek()]) {
+                    while (!stack.isEmpty() && heights[j] <= heights[stack.peek()]) {
                         int height = heights[stack.pop()];
                         int width = stack.isEmpty() ? j : j - stack.peek() - 1;
                         maxArea = Math.max(maxArea, height * width);
@@ -64,7 +66,7 @@ public class MaximalRectangle85 {
                 }
             }
 
-            while(!stack.isEmpty()) {
+            while (!stack.isEmpty()) {
                 int height = heights[stack.pop()];
                 int width = stack.isEmpty() ? colCount : colCount - stack.peek() - 1;
                 maxArea = Math.max(maxArea, height * width);
@@ -72,5 +74,30 @@ public class MaximalRectangle85 {
         }
 
         return maxArea;
+    }
+
+    public int numOfUnplacedFruits(int[] fruits, int[] baskets) {
+        int unplaced = 0;
+
+        for (int i = 0; i < fruits.length; i++) {
+            boolean isFound = false;
+            for (int j = 0; j < baskets.length && !isFound; j++) {
+                if (baskets[j] != 0 && baskets[j] >= fruits[i]) {
+                    baskets[j] = 0;
+                    isFound = true;
+                }
+            }
+
+            if (!isFound) {
+                unplaced++;
+            }
+        }
+
+        return unplaced;
+    }
+
+    public boolean isPowerOfTwo(int n) {
+        int w = n & (n - 1);
+        return w == 0;
     }
 }
