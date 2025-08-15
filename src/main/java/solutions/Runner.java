@@ -10,9 +10,11 @@ import java.util.List;
 public class Runner {
 
     public static void main(String[] args) throws IOException, ParseException {
-        BasicCalculator2 l = new BasicCalculator2();
-       // l.calculate(new String("1*2-3/4-26"));
-       l.calculate(new String("1*2+3*4-5*6+7*8-9*10"));
+
+
+
+        FruitsIntoBaskets3_3479 l = new FruitsIntoBaskets3_3479();
+       l.numOfUnplacedFruits(new int[] {98,51,70,9,21}, new int[] {21,52,3,30,16});
     }
 
 }
