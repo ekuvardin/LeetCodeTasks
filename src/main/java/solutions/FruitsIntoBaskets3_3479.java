@@ -1,5 +1,9 @@
 package solutions;
 
+/*
+    FruitsIntoBaskets3_3479 l = new FruitsIntoBaskets3_3479();
+       l.numOfUnplacedFruits(new int[] {98,51,70,9,21}, new int[] {21,52,3,30,16});
+ */
 public class FruitsIntoBaskets3_3479 {
     public int numOfUnplacedFruits(int[] fruits, int[] baskets) {
         int n = baskets.length;

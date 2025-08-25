@@ -13,8 +13,8 @@ public class Runner {
 
 
 
-        FruitsIntoBaskets3_3479 l = new FruitsIntoBaskets3_3479();
-       l.numOfUnplacedFruits(new int[] {98,51,70,9,21}, new int[] {21,52,3,30,16});
+        DiagonalTraverse498 l = new DiagonalTraverse498();
+       l.findDiagonalOrder(new int[][] {{1,2,3},  {4,5,6},  {7,8,9}});
     }
 
 }
