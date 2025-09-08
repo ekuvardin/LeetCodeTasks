@@ -13,7 +13,12 @@ public class Runner {
     public static void main(String[] args) throws IOException, ParseException {
     //    productQueries(806335498, new int[][]{{1,8}});
       //  productQueries(1, new int[][]{{0,0}});
-        BestTimetoBuy714.largestGoodInteger("6777139999");
+        LRUCache1 lr = new LRUCache1(2);
+        lr.put("1");
+        lr.put("2");
+        lr.put("1");
+        lr.put("3");
+        lr.get("2");
 
     }
 }
