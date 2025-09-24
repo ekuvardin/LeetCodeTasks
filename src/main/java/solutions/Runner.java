@@ -12,14 +12,8 @@ import java.util.Map;
 public class Runner {
 
     public static void main(String[] args) throws IOException, ParseException {
-    //    productQueries(806335498, new int[][]{{1,8}});
-      //  productQueries(1, new int[][]{{0,0}});
-        LRUCache1 lr = new LRUCache1(2);
-        lr.put("1");
-        lr.put("2");
-        lr.put("1");
-        lr.put("3");
-        lr.get("2");
-
+        DesignSpreadsheet3484 lr = new DesignSpreadsheet3484(2);
+        lr.setCell("A1", -5);
+        lr.getValue("=A1+2");
     }
 }
