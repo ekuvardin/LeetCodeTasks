@@ -8,6 +8,6 @@ public class Runner {
 
     public static void main(String[] args) throws IOException, ParseException {
         FractiontoRecurringDecimal166 lr = new FractiontoRecurringDecimal166();
-        lr.fractionToDecimal(-1,-2147483648);
+        lr.fractionToDecimal(400,333);
     }
 }
