@@ -34,6 +34,7 @@ public class RateLimiterCustom {
     private final int windowSize;
     private final Bucket[] buckets;
     private final Map<Integer, Integer> userRequests;
+    private long lastProcessedTime = -1;
     int usersExceedRates = 0;
 
     public RateLimiterCustom(int threshold, int windowSize) {
@@ -44,22 +45,18 @@ public class RateLimiterCustom {
 
         for (int i = 0; i < windowSize; i++) {
             buckets[i] = new Bucket();
-            buckets[i].timestamp = Integer.MIN_VALUE;
+            buckets[i].timestamp = -1;
         }
     }
 
-    private static class Bucket {
+    public static class Bucket {
         long timestamp;
-        // Можно заменить на, если много запросов от одного пользователя в секунду
-        // Map<Integer, Integer> userHits = new HashMap<>();
-        List<Integer> users = new ArrayList<>();
+        Map<Integer, Integer> userHits = new HashMap<>();
 
-        void clear(long ts) {
-            timestamp = ts;
-            users.clear();
+        void clear() {
+            userHits.clear();
         }
     }
-
 
     public void registerRequest(int userId) {
         long timestamp = System.currentTimeMillis() / 1000;
@@ -68,14 +65,18 @@ public class RateLimiterCustom {
 
     //For test
     public void registerRequest(long timestamp, int userId) {
+        clearBuckets(timestamp);
+
         int index = (int) (timestamp % this.windowSize);
         Bucket currentBucket = buckets[index];
 
         if (currentBucket.timestamp != timestamp) {
-            clearBucket(currentBucket, timestamp);
+            currentBucket.timestamp = timestamp;
+            currentBucket.clear();
         }
 
-        currentBucket.users.add(userId);
+        currentBucket.userHits.merge(userId, 1, Integer::sum);
+
         int cnt = userRequests.getOrDefault(userId, 0);
         userRequests.put(userId, cnt + 1);
 
@@ -84,25 +85,136 @@ public class RateLimiterCustom {
         }
     }
 
-    public void clearBucket(Bucket bucket, long timestamp) {
-        for (int uid : bucket.users) {
-            int prev = userRequests.get(uid);
-            int newCnt = prev - 1;
+    public void clearBuckets(long now) {
+        if (lastProcessedTime == -1) {
+            lastProcessedTime = now;
+            return;
+        }
 
-            if (prev == threshold + 1) {
+        long oldestValid = now - windowSize + 1;
+        long start = Math.max(lastProcessedTime + 1, oldestValid);
+
+        for (long ts = start; ts <= now; ts++) {
+            int index = (int) (ts % windowSize);
+            Bucket bucket = buckets[index];
+
+            if (bucket.timestamp == ts) {
+                clearBucket(bucket);
+            }
+        }
+
+        lastProcessedTime = now;
+    }
+
+    public void clearBucket(Bucket bucket) {
+        for (Map.Entry<Integer, Integer> entry : bucket.userHits.entrySet()) {
+            int userId = entry.getKey();
+            int value = entry.getValue();
+
+            int prev = userRequests.get(userId);
+            int newCnt = prev - value;
+
+            if (prev > threshold && newCnt <= threshold) {
                 usersExceedRates--;
             }
 
             if (newCnt == 0) {
-                userRequests.remove(uid);
+                userRequests.remove(userId);
             } else {
-                userRequests.put(uid, newCnt);
+                userRequests.put(userId, newCnt);
             }
         }
-        bucket.clear(timestamp);
+        bucket.clear();
     }
 
     public int getCountUser() {
         return usersExceedRates;
     }
+
+    /*Tests*/
+
+    public static void basisThreshold() {
+        RateLimiterCustom rateLimiterCustom = new RateLimiterCustom(2, 2);
+        rateLimiterCustom.registerRequest(10, 1);
+        rateLimiterCustom.registerRequest(10, 1);
+        rateLimiterCustom.registerRequest(10, 1);
+
+        assert rateLimiterCustom.getCountUser() == 1;
+    }
+
+    public static void noThreshold() {
+        RateLimiterCustom rateLimiterCustom = new RateLimiterCustom(2, 2);
+        rateLimiterCustom.registerRequest(10, 1);
+        rateLimiterCustom.registerRequest(11, 1);
+
+        assert rateLimiterCustom.getCountUser() == 0;
+    }
+
+    public static void windowShift() {
+        RateLimiterCustom rateLimiterCustom = new RateLimiterCustom(2, 2);
+        rateLimiterCustom.registerRequest(10, 1);
+        rateLimiterCustom.registerRequest(10, 1);
+        rateLimiterCustom.registerRequest(10, 1);
+
+        assert rateLimiterCustom.getCountUser() == 1;
+
+        rateLimiterCustom.registerRequest(12, 1);
+
+        assert rateLimiterCustom.getCountUser() == 0;
+    }
+
+
+    public static void windowShiftNSeconds() {
+        RateLimiterCustom rateLimiterCustom = new RateLimiterCustom(2, 2);
+        rateLimiterCustom.registerRequest(10, 1);
+        rateLimiterCustom.registerRequest(10, 1);
+        rateLimiterCustom.registerRequest(11, 1);
+
+        assert rateLimiterCustom.getCountUser() == 1;
+
+        rateLimiterCustom.registerRequest(15, 2);
+
+        assert rateLimiterCustom.getCountUser() == 0;
+    }
+
+
+    public static void reuseBacket() {
+        RateLimiterCustom rateLimiterCustom = new RateLimiterCustom(2, 2);
+        rateLimiterCustom.registerRequest(10, 1);
+        rateLimiterCustom.registerRequest(11, 1);
+        rateLimiterCustom.registerRequest(12, 2);
+
+        assert rateLimiterCustom.getCountUser() == 0;
+    }
+
+    public static void twoUsersExitWindow() {
+        RateLimiterCustom rateLimiterCustom = new RateLimiterCustom(2, 2);
+        rateLimiterCustom.registerRequest(10, 1);
+        rateLimiterCustom.registerRequest(10, 1);
+        rateLimiterCustom.registerRequest(11, 2);
+        rateLimiterCustom.registerRequest(11, 2);
+        rateLimiterCustom.registerRequest(11, 2);
+
+        assert rateLimiterCustom.getCountUser() == 1;
+
+        rateLimiterCustom.registerRequest(12, 1);
+
+        assert rateLimiterCustom.getCountUser() == 1;
+    }
+
+    public static void noThresholdSecondTime() {
+        RateLimiterCustom rateLimiterCustom = new RateLimiterCustom(2, 2);
+        rateLimiterCustom.registerRequest(10, 1);
+        rateLimiterCustom.registerRequest(10, 1);
+        rateLimiterCustom.registerRequest(10, 1);
+
+
+        assert rateLimiterCustom.getCountUser() == 1;
+
+        rateLimiterCustom.registerRequest(12, 2);
+
+        assert rateLimiterCustom.getCountUser() == 0;
+    }
 }
+
+

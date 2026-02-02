@@ -32,10 +32,7 @@ import java.util.stream.Collectors;
 public class Runner {
 
     public static void main(String[] args) throws Exception {
-        MinimumPairRemovaltoSortArrayI3507 meetingRoomsIII2402 = new MinimumPairRemovaltoSortArrayI3507();
-
-
-        meetingRoomsIII2402.minimumPairRemoval(new int[] {2,4,3,0,1,6,7,2,5,3});
+        RateLimiterCustom.windowShift();
     }
 }
 
