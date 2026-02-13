@@ -55,6 +55,7 @@ public class RateLimiterCustom {
 
         void clear() {
             userHits.clear();
+            timestamp = -1;
         }
     }
 
@@ -63,62 +64,75 @@ public class RateLimiterCustom {
         registerRequest(timestamp, userId);
     }
 
-    //For test
     public void registerRequest(long timestamp, int userId) {
-        clearBuckets(timestamp);
+        evictStale(timestamp);
 
-        int index = (int) (timestamp % this.windowSize);
-        Bucket currentBucket = buckets[index];
+        int index = (int) (timestamp % windowSize);
+        Bucket bucket = buckets[index];
 
-        if (currentBucket.timestamp != timestamp) {
-            currentBucket.timestamp = timestamp;
-            currentBucket.clear();
+        // Если бакет занят данными другой (устаревшей) секунды — вытесняем
+        if (bucket.timestamp != -1 && bucket.timestamp != timestamp) {
+            evictBucket(bucket);
         }
 
-        currentBucket.userHits.merge(userId, 1, Integer::sum);
+        bucket.timestamp = timestamp;
+        bucket.userHits.merge(userId, 1, Integer::sum);
 
-        int cnt = userRequests.getOrDefault(userId, 0);
-        userRequests.put(userId, cnt + 1);
+        int oldCnt = userRequests.getOrDefault(userId, 0);
+        userRequests.put(userId, oldCnt + 1);
 
-        if (cnt == threshold) {
+        if (oldCnt == threshold) {
             usersExceedRates++;
         }
     }
 
-    public void clearBuckets(long now) {
+    /**
+     * Вытесняем бакеты, которые вышли за пределы окна,
+     * но ещё не были очищены.
+     */
+    private void evictStale(long now) {
         if (lastProcessedTime == -1) {
             lastProcessedTime = now;
             return;
         }
 
         long oldestValid = now - windowSize + 1;
-        long start = Math.max(lastProcessedTime + 1, oldestValid);
 
-        for (long ts = start; ts <= now; ts++) {
+        // Проходим только по слотам, ставшим "протухшими"
+        // между lastProcessedTime и now
+        long prevOldest = lastProcessedTime - windowSize + 1;
+        long start = Math.max(prevOldest, 0);
+        long end = Math.min(oldestValid - 1, lastProcessedTime);
+
+        // Ограничение: не больше windowSize итераций
+        if (end - start >= windowSize) {
+            start = end - windowSize + 1;
+        }
+
+        for (long ts = start; ts <= end; ts++) {
             int index = (int) (ts % windowSize);
             Bucket bucket = buckets[index];
-
-            if (bucket.timestamp == ts) {
-                clearBucket(bucket);
+            if (bucket.timestamp != -1 && bucket.timestamp < oldestValid) {
+                evictBucket(bucket);
             }
         }
 
         lastProcessedTime = now;
     }
 
-    public void clearBucket(Bucket bucket) {
+    private void evictBucket(Bucket bucket) {
         for (Map.Entry<Integer, Integer> entry : bucket.userHits.entrySet()) {
             int userId = entry.getKey();
-            int value = entry.getValue();
+            int hits = entry.getValue();
 
-            int prev = userRequests.get(userId);
-            int newCnt = prev - value;
+            int prev = userRequests.getOrDefault(userId, 0);
+            int newCnt = prev - hits;
 
             if (prev > threshold && newCnt <= threshold) {
                 usersExceedRates--;
             }
 
-            if (newCnt == 0) {
+            if (newCnt <= 0) {
                 userRequests.remove(userId);
             } else {
                 userRequests.put(userId, newCnt);

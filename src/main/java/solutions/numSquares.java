@@ -2,7 +2,7 @@ package solutions;
 
 import java.util.*;
 
-class Sol {
+class numSquares {
     public int numSquares(int n) {
         int size = (int) Math.sqrt(n);
         Integer[] squares = new Integer[size];
@@ -18,7 +18,7 @@ class Sol {
         }
 
         Set<Integer> set = new HashSet<>();
-        while (diffs.size() > 0 && !diffs.contains(0)) {
+        while (!diffs.isEmpty() && !diffs.contains(0)) {
             for (int i = 0; i < size; i++) {
                 for (Integer val : diffs) {
                     if (val - squares[i] > 0) {
